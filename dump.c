@@ -16,6 +16,7 @@ void dump(uint64_t x){
 }
 
 int main(){
+	dump(69420);
 	dump(420);
 	dump(69);
 	return 0;

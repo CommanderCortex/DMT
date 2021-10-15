@@ -54,7 +54,11 @@ dump:
 	movq	%rax, %rdx
 	movq	%rcx, %rsi
 	movl	$1, %edi
-	call	write@PLT
+	mov 	rax, 1
+	mov 	rbx, rax
+	mov 	rax, 60
+	syscall
+	;;call	write@PLT
 	nop
 	movq	-8(%rbp), %rax
 	xorq	%fs:40, %rax
@@ -78,6 +82,8 @@ main:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
+	movl	$69420, %edi
+	call	dump
 	movl	$420, %edi
 	call	dump
 	movl	$69, %edi
