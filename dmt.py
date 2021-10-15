@@ -71,18 +71,18 @@ def simulateProgram(program):
 def compileProgram(program, out_file_path):
     with open(out_file_path, "w") as out:
         out.write("segment .text\n")
-        out.write("     dump(unsigned long):\n")
+        out.write("     dump:\n")
         out.write("         push    rbp\n")
         out.write("         mov     rbp, rsp\n")
         out.write("         sub     rsp, 64\n")
-        out.write("         mov     QWORD PTR [rbp-56], rdi\n")
-        out.write("         mov     QWORD PTR [rbp-8], 1\n")
+        out.write("         mov     rax, rdi\n")
+        out.write("         mov     rax, 1\n")
         out.write("         mov     eax, 32\n")
-        out.write("         sub     rax, QWORD PTR [rbp-8]\n")
-        out.write("         mov     BYTE PTR [rbp-48+rax], 10\n")
+        out.write("         sub     rax, rbp\n")
+        out.write("         mov     BYTE [rbp-48+rax], 10\n")
         out.write("     .L2:\n")
-        out.write("         mov     rcx, QWORD PTR [rbp-56]\n")
-        out.write("         movabs  rdx, -3689348814741910323\n")
+        out.write("         mov     rcx, [rbp-56]\n")
+        out.write("         mov     rdx, rax\n")
         out.write("         mov     rax, rcx\n")
         out.write("         mul     rdx\n")
         out.write("         shr     rdx, 3\n")
@@ -95,26 +95,26 @@ def compileProgram(program, out_file_path):
         out.write("         mov     eax, edx\n")
         out.write("         lea     edx, [rax+48]\n")
         out.write("         mov     eax, 31\n")
-        out.write("         sub     rax, QWORD PTR [rbp-8]\n")
-        out.write("         mov     BYTE PTR [rbp-48+rax], dl\n")
-        out.write("         add     QWORD PTR [rbp-8], 1\n")
-        out.write("         mov     rax, QWORD PTR [rbp-56]\n")
-        out.write("         movabs  rdx, -3689348814741910323\n")
+        out.write("         sub     rax, [rbp-8]\n")
+        out.write("         mov     BYTE [rbp-48+rax], dl\n")
+        out.write("         add     rax, 1\n")
+        out.write("         mov     rax, [rbp-56]\n")
+        out.write("         mov     rdx, rax\n")
         out.write("         mul     rdx\n")
         out.write("         mov     rax, rdx\n")
         out.write("         shr     rax, 3\n")
-        out.write("         mov     QWORD PTR [rbp-56], rax\n")
-        out.write("         cmp     QWORD PTR [rbp-56], 0\n")
+        out.write("         mov     [rbp-56], rax\n")
+        out.write("         cmp     [rbp-56], rax\n")
         out.write("         jne     .L2\n")
         out.write("         mov     eax, 32\n")
-        out.write("         sub     rax, QWORD PTR [rbp-8]\n")
+        out.write("         sub     rax, [rbp-8]\n")
         out.write("         lea     rdx, [rbp-48]\n")
         out.write("         lea     rcx, [rdx+rax]\n")
-        out.write("         mov     rax, QWORD PTR [rbp-8]\n")
+        out.write("         mov     rax, [rbp-8]\n")
         out.write("         mov     rdx, rax\n")
         out.write("         mov     rsi, rcx\n")
         out.write("         mov     edi, 1\n")
-        out.write("         call    write\n")
+        out.write("         mov     rbx, 1\n")
         out.write("         nop\n")
         out.write("         leave\n")
         out.write("         ret\n")
@@ -145,7 +145,8 @@ def compileProgram(program, out_file_path):
                 out.write("     ;; -- TODO")
             elif op[0] == OP_DUMP:
                 out.write("     ;; -- hlt --\n")
-                
+                out.write("     pop rbx\n")
+                out.write("     call dump\n")
             else:
                 assert False, "Unreachable"
         out.write("     mov rax, 60\n")
@@ -161,7 +162,8 @@ program=[
     mov(500),
     mov(80),
     sub(),
-    hlt()
+    stk(),
+    hlt(),
 ]        
 
 def usage():
@@ -185,9 +187,9 @@ if __name__ == '__main__':
     if subcommand == "sim":
         simulateProgram(program)
     elif subcommand == "com":
-        compileProgram(program, "output.asm")
-        call_cmd(["nasm", "-felf64", "output.asm"])
-        call_cmd(["ld", "-o", "output", "output.o"])
+        compileProgram(program, "test.asm")
+        call_cmd(["nasm", "-felf64", "test.asm"])
+        call_cmd(["ld", "-o", "test", "test.o"])
         #call_cmd(["rm", "output.asm", "output.o"])
 
     else:
